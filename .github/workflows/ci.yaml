@@ -1,0 +1,52 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  rustfmt:
+    name: Check rustfmt
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - run: cargo fmt --all -- --check
+
+  compile_and_clippy:
+    name: Compile and Clippy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    env:
+      RUSTFLAGS: -D warnings
+      RUSTDOCFLAGS: -D warnings
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: hecrj/setup-rust-action@v1
+        with:
+          components: clippy
+      - name: Cache cargo directories
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
+            ${{ runner.os }}-cargo-
+      - name: Cache cargo target dirs
+        uses: actions/cache@v2
+        with:
+          path: target
+          key: ${{ runner.os }}-target-lint-stable-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-target-lint-stable-${{ hashFiles('**/Cargo.toml') }}
+            ${{ runner.os }}-target-lint-stable-
+            ${{ runner.os }}-target-lint-
+
+      - name: no features
+        run: cargo clippy --all-targets
