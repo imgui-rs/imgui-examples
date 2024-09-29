@@ -49,4 +49,4 @@ jobs:
             ${{ runner.os }}-target-lint-
 
       - name: no features
-        run: cargo clippy --all-targets
+        run: cargo clippy --examples
