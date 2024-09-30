@@ -5,7 +5,7 @@ use imgui_glium_renderer::Renderer;
 use imgui_winit_support::winit::dpi::LogicalSize;
 use imgui_winit_support::winit::event::{Event, WindowEvent};
 use imgui_winit_support::winit::event_loop::EventLoop;
-use imgui_winit_support::winit::window::WindowBuilder;
+use imgui_winit_support::winit::window::WindowAttributes;
 use imgui_winit_support::{HiDpiMode, WinitPlatform};
 use std::path::Path;
 use std::time::Instant;
@@ -32,13 +32,13 @@ where
     };
     let event_loop = EventLoop::new().expect("Failed to create EventLoop");
 
-    let builder = WindowBuilder::new()
+    let window_attributes = WindowAttributes::default()
         .with_title(title)
         .with_inner_size(LogicalSize::new(1024, 768));
     let (window, display) = glium::backend::glutin::SimpleWindowBuilder::new()
-        .set_window_builder(builder)
+        .set_window_builder(window_attributes)
         .build(&event_loop);
-    let mut renderer = Renderer::init(&mut imgui, &display).expect("Failed to initialize renderer");
+    let mut renderer = Renderer::new(&mut imgui, &display).expect("Failed to initialize renderer");
 
     if let Some(backend) = clipboard::init() {
         imgui.set_clipboard_backend(backend);
@@ -46,7 +46,7 @@ where
         eprintln!("Failed to initialize clipboard");
     }
 
-    let mut platform = WinitPlatform::init(&mut imgui);
+    let mut platform = WinitPlatform::new(&mut imgui);
     {
         let dpi_mode = if let Ok(factor) = std::env::var("IMGUI_EXAMPLE_FORCE_DPI_FACTOR") {
             // Allow forcing of HiDPI factor for debugging purposes
@@ -65,6 +65,7 @@ where
 
     startup(&mut imgui, &mut renderer, &display);
 
+    #[allow(deprecated)]
     event_loop
         .run(move |event, window_target| match event {
             Event::NewEvents(_) => {
