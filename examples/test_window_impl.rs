@@ -914,7 +914,7 @@ fn show_example_menu_file(ui: &Ui, state: &mut FileMenuState) {
 
         ui.child_window("child")
             .size([0.0, 60.0])
-            .border(true)
+            .child_flags(ChildFlags::BORDERS)
             .build(|| {
                 for i in 0..10 {
                     ui.text(format!("Scrolling Text {}", i));
